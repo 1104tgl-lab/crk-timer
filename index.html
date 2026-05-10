@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CRK PRO LIVE v13.8</title>
+    <title>CRK PRO LIVE v13.9</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
@@ -18,7 +18,7 @@
         * { box-sizing: border-box; font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-body); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* 🔥 사이드바 슬라이딩 애니메이션 복구 🔥 */
+        /* 네비게이션 */
         .sidebar-wrapper { width: 100%; height: 60px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
         .sidebar { position: relative; width: 100%; height: 100%; display: flex; flex-direction: row; padding: 0 15px; justify-content: space-between; align-items: center; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
         .logo { font-size: 20px; font-weight: 900; color: var(--c-cyan); display: flex; align-items: center; gap: 10px; }
@@ -34,7 +34,7 @@
         .view-section.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 카드 및 아이템 인터랙션 복구 */
+        /* 카드 레이아웃 - PC/모바일 하이브리드 최적화 */
         .row { display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px; width: 100%; }
         .card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border-radius: 18px; padding: 20px; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .card-header { font-size: 13px; font-weight: 800; color: var(--text-main); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
@@ -43,12 +43,11 @@
         .item-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
         .item { background: rgba(15, 23, 42, 0.8); border-radius: 15px; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; transition: all 0.2s; }
         
-        /* 🔥 마우스 호버 효과 복구 🔥 */
         .item-click-area { padding: 20px 10px; cursor: pointer; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.2s; }
         .item-click-area:hover { background: rgba(255,255,255,0.08); }
         
-        .item-btn-area { background: var(--bg-btn); padding: 10px; display: flex; justify-content: center; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.2s; }
-        .item-btn-area:hover { background: rgba(56, 189, 248, 0.15); }
+        .item-btn-area { background: var(--bg-btn); padding: 10px; display: flex; justify-content: center; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.2s; font-size: 11px; font-weight: bold; color: var(--text-sub); }
+        .item-btn-area:hover { background: rgba(56, 189, 248, 0.15); color: var(--c-cyan); }
         
         .item-title { font-size: 11px; color: var(--text-sub); font-weight: bold; margin-bottom: 7px; text-align: center; }
         .item-val { font-size: 19px; font-weight: 900; letter-spacing: -0.5px; text-align: center; }
@@ -60,13 +59,26 @@
         .task-btn-del { background: #E11D48; }
         .task-btn-del:hover { background: #BE123C; }
 
-        /* 컬러 */
+        /* 🔥 컬러 피드백 복구 🔥 */
         .text-cyan { color: var(--c-cyan); text-shadow: 0 0 10px rgba(0, 230, 246, 0.3); }
         .text-purple { color: var(--c-purple); text-shadow: 0 0 10px rgba(157, 78, 221, 0.3); }
         .text-rose { color: var(--c-rose); text-shadow: 0 0 10px rgba(244, 63, 94, 0.3); }
+        /* READY / END 상태 전용 컬러 */
+        .text-green { color: #4ADE80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.3); }
+        .text-red { color: #F87171; text-shadow: 0 0 10px rgba(248, 113, 113, 0.3); }
         .text-white { color: #FFF; } .text-gray { color: #64748B; }
 
-        /* 🔥 PC 모드 하이브리드 최적화 (700px 이상) 🔥 */
+        /* 설정 페이지 겹침 해결 */
+        .settings-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+        .setting-card { width: 100%; max-width: 480px; }
+        .input-group { margin-bottom: 15px; width: 100%; }
+        .input-group label { display: block; font-size: 11px; color: var(--text-sub); margin-bottom: 5px; }
+        .input-group input { width: 100%; padding: 12px; border-radius: 10px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1); outline: none; }
+        .input-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .action-btn { background: var(--c-purple); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
+        .action-btn:active { transform: scale(0.98); }
+
+        /* 🔥 PC 모드 레이아웃 교정 (700px 이상이면 강제 PC모드) 🔥 */
         @media (min-width: 701px) {
             body { flex-direction: row; }
             .sidebar-wrapper { width: 75px; height: 100vh; border-bottom: none; border-right: 1px solid rgba(255,255,255,0.05); transition: width 0.3s; }
@@ -81,15 +93,11 @@
             
             .main-content { padding: 30px; }
             .row { flex-direction: row; align-items: stretch; }
-            .card { flex: 1; }
+            .card { flex: 1; width: auto; } /* PC 대화면 비율 교정 */
             .card-stam { flex: 1.2; } .card-track { flex: 1.8; } .card-train { flex: 2.5; }
         }
 
         dialog { margin: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; background: rgba(30,41,59,0.98); color: white; padding: 25px; width: 95%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .input-group { margin-bottom: 15px; width: 100%; }
-        .input-group label { display: block; font-size: 11px; color: var(--text-sub); margin-bottom: 5px; }
-        .input-group input { width: 100%; padding: 12px; border-radius: 10px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1); outline: none; }
-        .action-btn { background: var(--c-purple); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; }
     </style>
 </head>
 <body>
@@ -116,27 +124,27 @@
                 <div class="card card-track"><div class="card-header"><span class="dot" style="background:var(--c-purple)"></span> 시스템 트래킹</div><div class="item-grid" id="grid-track"></div></div>
             </div>
             <div class="row">
-                <div class="card"><div class="card-header"><span class="dot" style="background:var(--c-rose)"></span> 광산 탐사</div><div class="item-grid" id="grid-exp"></div></div>
+                <div class="card"><div class="card-header"><span class="dot" style="background:var(--c-rose)"></span> 광산 탐사</div><div class="item-grid" id="exp-container"></div></div>
                 <div class="card card-train"><div class="card-header"><span class="dot" style="background:var(--c-pink)"></span> 물류 열차</div><div class="item-grid" id="grid-train"></div></div>
-                <div class="card"><div class="card-header"><span class="dot" style="background:var(--c-sky)"></span> 열기구</div><div class="item-grid" id="grid-bal"></div></div>
+                <div class="card"><div class="card-header"><span class="dot" style="background:var(--c-sky)"></span> 열기구</div><div class="item-grid" id="bal-container"></div></div>
             </div>
             <div class="row"><div class="card"><div class="card-header"><span class="dot" style="background:var(--c-orange)"></span> 광맥 채굴</div><div class="item-grid" id="grid-mine"></div></div></div>
             <div class="row" id="row-tasks" style="display:none;"><div class="card"><div class="card-header"><span class="dot" style="background:var(--c-mint)"></span> 생산 / 업그레이드</div><div class="item-grid" id="grid-tasks"></div></div></div>
         </div>
 
         <div id="settings" class="view-section">
-            <div style="display:flex; flex-wrap:wrap; gap:20px; justify-content: center;">
-                <div class="card" style="width:100%; max-width:480px;">
+            <div class="settings-container">
+                <div class="card setting-card">
                     <div class="card-header">⚙️ 프로젝트 수동 등록</div>
                     <div class="input-group"><label>작업명</label><input type="text" id="mName" placeholder="예: 쿠키성 Lv.15"></div>
-                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                    <div class="input-row">
                         <div class="input-group"><label>일</label><input type="number" id="mD" value="0"></div>
                         <div class="input-group"><label>시</label><input type="number" id="mH" value="0"></div>
                         <div class="input-group"><label>분</label><input type="number" id="mM" value="0"></div>
                     </div>
                     <button class="action-btn" style="margin-top:10px;" onclick="addTask()">등록하기</button>
                 </div>
-                <div class="card" style="width:100%; max-width:480px; border-color:var(--c-green);">
+                <div class="card setting-card" style="border-color:var(--c-green);">
                     <div class="card-header">🔄 데이터 복구 (기존 코드)</div>
                     <textarea id="legacyCode" style="width:100%; height:80px; background:rgba(0,0,0,0.3); color:white; padding:10px; border-radius:10px; border: 1px solid rgba(255,255,255,0.1); font-size:10px; margin-bottom:10px; resize:none;"></textarea>
                     <button class="action-btn" style="background:var(--c-green); color:#000" onclick="recoverLegacyData()">클라우드로 복구하기</button>
@@ -148,7 +156,17 @@
         </div>
     </div>
 
-    <dialog id="setupModal"><h3 id="setupTitle" style="margin-bottom:15px;">설정</h3><div id="setupBody"></div><div style="margin-top:20px; display:flex; gap:10px;"><button class="action-btn" style="background:var(--c-cyan); color:#000; flex:2" onclick="applySetup()">확인</button><button id="btnReset" class="action-btn" style="background:var(--c-rose); flex:1" onclick="resetSetup()">리셋</button></div><button class="action-btn" style="background:#334155; margin-top:10px;" onclick="document.getElementById('setupModal').close()">취소</button></dialog>
+    <dialog id="setupModal">
+        <h3 id="setupTitle" style="margin-bottom:15px;">설정</h3>
+        <div id="setupBody"></div>
+        <div style="margin-top:20px; display:flex; gap:10px; justify-content: space-between;">
+            <button class="action-btn" style="background:var(--c-cyan); color:#000; width: auto;" onclick="applySetup()">확인</button>
+            <div style="display:flex; gap:10px;">
+                <button id="btnReset" class="action-btn" style="background:var(--c-rose); width: auto;" onclick="resetSetup()">리셋</button>
+                <button class="action-btn" style="background:#334155; width: auto;" onclick="document.getElementById('setupModal').close()">취소</button>
+            </div>
+        </div>
+    </dialog>
     <dialog id="accelModal"><h3 id="accelTitle" style="margin-bottom:15px;">가속</h3><div id="accelOptions" class="item-grid" style="grid-template-columns: 1fr 1fr;"></div><button class="action-btn" style="margin-top:20px;" onclick="applyAccel()">적용</button><button class="action-btn" style="background:#334155; margin-top:10px;" onclick="document.getElementById('accelModal').close()">취소</button></dialog>
 
 <script>
@@ -180,7 +198,6 @@
     function fmt(s) { if(s<=0) return "00:00:00"; let d=Math.floor(s/86400), h=Math.floor((s%86400)/3600), m=Math.floor((s%3600)/60), sc=Math.floor(s%60); let t=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${sc.toString().padStart(2,'0')}`; return d>0 ? `${d}d ${t}` : t; }
     function switchView(v, b) { document.querySelectorAll('.view-section').forEach(e => e.classList.remove('active')); document.getElementById(v).classList.add('active'); document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active')); b.classList.add('active'); }
 
-    // 제어
     function clickTracking(t) { let n = Math.floor(Date.now()/1000); if(t==='arena'){ if(state.arena>n) state.arena=0; else {state.arena=n+(state.kp?600:1800); notified['arena']=false;} } else if(t==='fount') state.fount=n; else if(t==='prod') state.prod=(state.prod>0)?0:n; save(); }
     function openStamModal(k, t) { tSetup='stam_'+k; document.getElementById('setupTitle').innerText=t; document.getElementById('setupBody').innerHTML=`<div class="input-group"><label>현재 / 최대</label><div style="display:flex; gap:10px;"><input type="number" id="sC" value="${state.stam[k].c}"> / <input type="number" id="sM" value="${state.stam[k].m}"></div></div>`; document.getElementById('btnReset').style.display='none'; document.getElementById('setupModal').showModal(); }
     function openSetupModal(id, t) { tSetup=id; document.getElementById('setupTitle').innerText=t; document.getElementById('btnReset').style.display='block'; let h=`<div class="input-group"><label>시 : 분</label><div style="display:flex; gap:10px;"><input type="number" id="setH" placeholder="시"> : <input type="number" id="setM" placeholder="분"></div></div>`; if(id==='exp'||id.startsWith('m_')) h=`<select id="setT" style="margin-bottom:10px; width:100%; padding:10px; border-radius:8px; background:#000; color:white;"><option value="custom">직접입력</option><option value="8">8시간</option><option value="11.5">11.5시간</option><option value="24">24시간</option></select>`+h; document.getElementById('setupBody').innerHTML=h; document.getElementById('setupModal').showModal(); }
@@ -192,9 +209,22 @@
     function recoverLegacyData() { try { const d = JSON.parse(decodeURIComponent(atob(document.getElementById('legacyCode').value.trim()))); if(confirm("클라우드 데이터를 덮어씌울까요?")) { db.ref('crk_data').set(d).then(()=>alert("복구 성공!")); } } catch(e){ alert("잘못된 코드"); } }
     document.getElementById('bgInput').addEventListener('change', function(e) { const f = e.target.files[0]; if(f){ const r = new FileReader(); r.onload = function(evt){ state.bg = evt.target.result; save(); document.body.style.backgroundImage = `url('${state.bg}')`; }; r.readAsDataURL(f); } });
 
+    // 🔥 drawItem 함수 수정: READY / END 컬러 피드백 복구 🔥
     function drawItem(title, end, id, theme, isT=false, idx=0) {
         let n=Math.floor(Date.now()/1000), run=end>n, isE=end>0 && end<=n;
-        let vStr=run ? fmt(end-n) : (isE ? "END" : "READY"), vCls=isE ? "text-gray" : theme;
+        let vStr, vCls;
+        
+        if (run) {
+            vStr = fmt(end-n);
+            vCls = theme; // 진행 중일 때는 테마 색상 (rose, cyan 등)
+        } else if (isE) {
+            vStr = "END";
+            vCls = "text-red"; // 완료 상태는 빨간색
+        } else {
+            vStr = "READY";
+            vCls = "text-green"; // 준비 상태는 초록색
+        }
+        
         let btn = isT ? `<div class="task-btn-container"><div class="task-btn-half" onclick="openAccelModal('${id}','${title}')">▶▶▶</div><div class="task-btn-half task-btn-del" onclick="event.stopPropagation(); state.tasks.splice(${idx},1); save();">✖</div></div>` : `<div class="item-btn-area" onclick="openAccelModal('${id}','${title}')">▶▶▶</div>`;
         return `<div class="item"><div class="item-click-area" onclick="openSetupModal('${isT?'t_'+idx:id}','${title}')"><div class="item-title">${title}</div><div class="item-val ${vCls}">${vStr}</div></div>${btn}</div>`;
     }
@@ -210,9 +240,9 @@
         });
         document.getElementById('grid-stam').innerHTML = h_s;
         document.getElementById('grid-track').innerHTML = `<div class="item"><div class="item-click-area" onclick="clickTracking('arena')"><div class="item-title">아레나</div><div class="item-val text-purple">${state.arena>now?fmt(state.arena-now):'READY'}</div></div></div><div class="item"><div class="item-click-area" onclick="clickTracking('fount')"><div class="item-title">분수</div><div class="item-val text-white">${fmt(now-state.fount)}</div></div></div><div class="item"><div class="item-click-area" onclick="clickTracking('prod')"><div class="item-title">생산</div><div class="item-val text-white">${state.prod>0?fmt(now-state.prod):'OFF'}</div></div></div>`;
-        document.getElementById('grid-exp').innerHTML = drawItem("광산 탐사", state.exp, "exp", "text-rose");
+        document.getElementById('exp-container').innerHTML = drawItem("광산 탐사", state.exp, "exp", "text-rose");
         let h_tr=''; [0,1,2].forEach(i => h_tr += drawItem("물류 열차", state.bear_train[i], 'tr_'+i, "text-pink")); document.getElementById('grid-train').innerHTML = h_tr;
-        document.getElementById('grid-bal').innerHTML = drawItem("열기구", state.bear_balloon, "bal", "text-sky");
+        document.getElementById('bal-container').innerHTML = drawItem("열기구", state.bear_balloon, "bal", "text-sky");
         let h_m=''; [0,1,2,3,4,5].forEach(i => h_m += drawItem("광맥 채굴", state.mining[i], 'm_'+i, "text-orange")); document.getElementById('grid-mine').innerHTML = h_m;
         if(state.tasks && state.tasks.length>0){
             document.getElementById('row-tasks').style.display='flex';
@@ -220,6 +250,8 @@
             let h_t=''; sortedT.forEach(t=>{ h_t+=drawItem(t.name, t.end, 't_'+t.orig, "text-mint", true, t.orig); if(t.end>0 && t.end<=now) notify('t'+t.orig, t.name+' 완료!'); });
             document.getElementById('grid-tasks').innerHTML = h_t;
         } else document.getElementById('row-tasks').style.display='none';
+        if(state.arena>0 && state.arena<=now) notify('arena','아레나 준비!');
+        if(state.exp>0 && state.exp<=now) notify('exp','탐사 완료!');
     }
     setInterval(render, 1000);
 </script>
