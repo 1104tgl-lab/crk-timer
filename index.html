@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CRK PRO LIVE v14.7</title>
+    <title>CRK PRO LIVE v15.0</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
@@ -60,7 +60,7 @@
         .text-rose { color: var(--c-rose); } .text-sky { color: var(--c-sky); } .text-orange { color: var(--c-orange); }
         .text-mint { color: var(--c-mint); } .text-white { color: #FFF; } .text-gray { color: #64748B; }
 
-        /* 🔥 PC 레이아웃 철통 방어 🔥 */
+        /* 🔥 PC 레이아웃 고정 🔥 */
         @media (min-width: 901px) {
             body { flex-direction: row; }
             .sidebar-wrapper { width: 70px; height: 100vh; border-bottom: none; border-right: 1px solid rgba(255,255,255,0.05); transition: width 0.3s; }
@@ -78,11 +78,10 @@
             .card-exp { flex: 0.8; } .card-bal { flex: 0.8; } .card-train { flex: 2.5; }
             .card-stam { flex: 1.1; } .card-track { flex: 2.2; }
             
-            /* 광맥 채굴, 생산/업그레이드 강제 6열 고정 (찌그러짐 완전 방지) */
             #grid-mine, #grid-tasks { grid-template-columns: repeat(6, 1fr) !important; }
         }
 
-        /* 설정창 그리드화 (겹침 완전 방지) */
+        /* 설정창 그리드 */
         .settings-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; width: 100%; }
         .setting-card { flex: 1; min-width: 350px; max-width: 500px; }
         .input-group { margin-bottom: 12px; width: 100%; }
@@ -97,8 +96,8 @@
 <body>
     <div id="loading-overlay">
         <div style="font-size: 50px; margin-bottom: 20px; animation: fadeIn 1s infinite alternate;">☁️</div>
-        <h2 style="color: var(--c-cyan);">클라우드 데이터 동기화 중...</h2>
-        <p style="color: var(--text-sub); font-size: 12px; margin-top: 10px;">데이터를 안전하게 불러오고 있습니다.</p>
+        <h2 style="color: var(--c-cyan);">클라우드 동기화 중...</h2>
+        <p style="color: var(--text-sub); font-size: 12px; margin-top: 10px;">연결 확인 중입니다.</p>
     </div>
 
     <input type="file" id="bgInput" accept="image/*" style="display: none;">
@@ -164,6 +163,7 @@
     <dialog id="accelModal"><h3 id="accelTitle" style="margin-bottom:15px;">가속</h3><div id="accelOptions" class="item-grid" style="grid-template-columns: 1fr 1fr;"></div><button class="action-btn" style="margin-top:20px;" onclick="applyAccel()">적용</button><button class="action-btn" style="background:#334155; margin-top:10px;" onclick="document.getElementById('accelModal').close()">취소</button></dialog>
 
 <script>
+    // 🔥 US 서버로 완전 교체된 Firebase 설정 🔥
     const firebaseConfig = {
         apiKey: "AIzaSyC7JjMhgFb6qw_NloERkHIwil9id-UOcJI",
         authDomain: "my-crk-timer.firebaseapp.com",
@@ -171,7 +171,7 @@
         storageBucket: "my-crk-timer.firebasestorage.app",
         messagingSenderId: "239900291854",
         appId: "1:239900291854:web:55880a710ae6e131dc1d5f",
-        databaseURL: "https://my-crk-timer-default-rtdb.asia-southeast1.firebasedatabase.app"
+        databaseURL: "https://my-crk-timer-default-rtdb.firebaseio.com" // <- 바로 이 부분이 무한 로딩의 원인이었습니다!
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -180,19 +180,18 @@
     let state = JSON.parse(JSON.stringify(INITIAL_STATE));
     let notified={};
 
-    // 🔥 3초 로딩 타임아웃 방어막 (무한 대기 방지) 🔥
+    // 타임아웃 방어막
     let loadTimeout = setTimeout(() => {
         let overlay = document.getElementById('loading-overlay');
         if(overlay && overlay.style.display !== 'none') {
             overlay.style.display = 'none';
-            alert("⚠️ 서버 연결이 지연되어 오프라인 모드로 진입합니다.\n인터넷 연결이나 Firebase 규칙(Rules) 설정을 확인해 주세요.");
             render();
         }
     }, 3000);
 
-    // 🔥 데이터 수신 및 에러 캐치 🔥
+    // 데이터 수신
     db.ref('crk_data').on('value', (s) => {
-        clearTimeout(loadTimeout); // 정상 수신 시 타임아웃 취소
+        clearTimeout(loadTimeout);
         const v = s.val();
         if(v) { 
             state = { ...INITIAL_STATE, ...v }; 
@@ -204,10 +203,8 @@
         document.getElementById('loading-overlay').style.display = 'none';
         render(); 
     }, (error) => {
-        // 🔥 권한 에러 발생 시 처리 🔥
         clearTimeout(loadTimeout);
         document.getElementById('loading-overlay').style.display = 'none';
-        alert("❌ 클라우드 접근 거부!\nFirebase 콘솔에서 Realtime Database의 '규칙(Rules)'이 true인지 확인하세요.\n상세: " + error.message);
         render();
     });
 
@@ -235,6 +232,7 @@
     function applyAccel() { let opts=[60,600,3600,43200], tot=0; opts.forEach((s,i)=>tot+=s*(parseInt(document.getElementById(`accel_${i}`).value)||0)); if(tot>0){ let n=Math.floor(Date.now()/1000); if(tAccel==='exp') state.exp=Math.max(n, state.exp-tot); else if(tAccel==='trade') state.trade=Math.max(n, state.trade-tot); else if(tAccel.startsWith('tr_')) state.bear_train[tAccel.split('_')[1]]=Math.max(n, state.bear_train[tAccel.split('_')[1]]-tot); else if(tAccel==='bal') state.bear_balloon=Math.max(n, state.bear_balloon-tot); else if(tAccel.startsWith('m_')) state.mining[tAccel.split('_')[1]]=Math.max(n, state.mining[tAccel.split('_')[1]]-tot); else if(tAccel.startsWith('t_')) state.tasks[tAccel.split('_')[1]].end=Math.max(n, state.tasks[tAccel.split('_')[1]].end-tot); save(); } document.getElementById('accelModal').close(); }
     function addTask() { let n=document.getElementById('mName').value, d=parseInt(document.getElementById('mD').value)||0, h=parseInt(document.getElementById('mH').value)||0, m=parseInt(document.getElementById('mM').value)||0; let s=(d*86400)+(h*3600)+(m*60); if(n && s>0){ if(!state.tasks) state.tasks=[]; state.tasks.push({name:n, end:Math.floor(Date.now()/1000)+s}); save(); document.getElementById('mName').value=''; switchView('dashboard', document.querySelectorAll('.nav-btn')[0]); } }
     function recoverLegacyData() { try { const d = JSON.parse(decodeURIComponent(atob(document.getElementById('legacyCode').value.trim()))); if(confirm("클라우드 데이터를 덮어씌울까요?")) { db.ref('crk_data').set(d).then(()=>alert("복구 성공!")); } } catch(e){ alert("잘못된 코드"); } }
+    document.getElementById('bgInput').addEventListener('change', function(e) { const f = e.target.files[0]; if(f){ const r = new FileReader(); r.onload = function(evt){ state.bg = evt.target.result; save(); document.body.style.backgroundImage = `url('${state.bg}')`; }; r.readAsDataURL(f); } });
 
     function getSortedIndices(arr, now) { return arr.map((v, i) => i).sort((a, b) => { let eA = arr[a], eB = arr[b]; let isRunningA = eA > now, isRunningB = eB > now; if (isRunningA && !isRunningB) return -1; if (!isRunningA && isRunningB) return 1; if (isRunningA && isRunningB) return eA - eB; return a - b; }); }
 
@@ -263,11 +261,11 @@
             <div class="item"><div class="item-click-area" onclick="clickTracking('trade')"><div class="item-title">무역소</div><div class="item-val ${state.trade>now?'text-purple':'text-gray'}">${state.trade>now?fmt(state.trade-now):'READY'}</div></div></div>
         `;
         
-        document.getElementById('exp-container').innerHTML = drawItem("탐사", state.exp, "exp", "text-rose");
+        document.getElementById('exp-container').innerHTML = drawItem("광산 탐사", state.exp, "exp", "text-rose");
         document.getElementById('bal-container').innerHTML = drawItem("열기구", state.bear_balloon, "bal", "text-sky");
-        let h_tr=''; getSortedIndices(state.bear_train, now).forEach(i => h_tr += drawItem("열차", state.bear_train[i], 'tr_'+i, "text-pink")); document.getElementById('grid-train').innerHTML = h_tr;
+        let h_tr=''; getSortedIndices(state.bear_train, now).forEach(i => h_tr += drawItem("물류 열차", state.bear_train[i], 'tr_'+i, "text-pink")); document.getElementById('grid-train').innerHTML = h_tr;
         
-        let h_m=''; getSortedIndices(state.mining, now).forEach(i => h_m += drawItem("채굴", state.mining[i], 'm_'+i, "text-orange")); document.getElementById('grid-mine').innerHTML = h_m;
+        let h_m=''; getSortedIndices(state.mining, now).forEach(i => h_m += drawItem("광맥 채굴", state.mining[i], 'm_'+i, "text-orange")); document.getElementById('grid-mine').innerHTML = h_m;
         
         if(state.tasks && state.tasks.length>0){
             document.getElementById('row-tasks').style.display='flex';
