@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CRK PRO LIVE v13.9</title>
+    <title>CRK PRO LIVE v14.1</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
@@ -20,157 +20,136 @@
 
         /* 네비게이션 */
         .sidebar-wrapper { width: 100%; height: 60px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
-        .sidebar { position: relative; width: 100%; height: 100%; display: flex; flex-direction: row; padding: 0 15px; justify-content: space-between; align-items: center; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
-        .logo { font-size: 20px; font-weight: 900; color: var(--c-cyan); display: flex; align-items: center; gap: 10px; }
-        .txt { opacity: 1; transition: opacity 0.2s; white-space: nowrap; } /* 모바일은 항상 보임 */
-        
-        .nav-group { display: flex; gap: 5px; }
-        .nav-btn { display: flex; align-items: center; gap: 10px; background: transparent; border: none; color: var(--text-sub); padding: 10px 15px; font-size: 16px; cursor: pointer; border-radius: 10px; transition: 0.2s; }
-        .nav-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-main); }
-        .nav-btn.active { color: var(--text-main); background: rgba(255,255,255,0.1); font-weight: bold; }
+        .sidebar { position: relative; width: 100%; height: 100%; display: flex; flex-direction: row; padding: 0 15px; justify-content: space-between; align-items: center; transition: width 0.3s ease; overflow: hidden; }
+        .logo { font-size: 20px; font-weight: 900; color: var(--c-cyan); }
+        .txt { display: none; }
+        .nav-group { display: flex; gap: 8px; }
+        .nav-btn { background: transparent; border: none; color: var(--text-sub); padding: 10px; font-size: 18px; cursor: pointer; border-radius: 10px; transition: 0.2s; }
+        .nav-btn.active { color: var(--text-main); background: rgba(255,255,255,0.1); }
 
         .main-content { flex: 1; padding: 15px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        .view-section { display: none; width: 100%; max-width: 1550px; margin: 0 auto; }
-        .view-section.active { display: block; animation: fadeIn 0.4s ease; }
+        .view-section { display: none; width: 100%; max-width: 1600px; margin: 0 auto; }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 카드 레이아웃 - PC/모바일 하이브리드 최적화 */
+        /* 카드 레이아웃 */
         .row { display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px; width: 100%; }
         .card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border-radius: 18px; padding: 20px; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .card-header { font-size: 13px; font-weight: 800; color: var(--text-main); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
         .dot { width: 8px; height: 8px; border-radius: 50%; }
 
         .item-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
-        .item { background: rgba(15, 23, 42, 0.8); border-radius: 15px; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; transition: all 0.2s; }
-        
-        .item-click-area { padding: 20px 10px; cursor: pointer; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.2s; }
+        .item { background: rgba(15, 23, 42, 0.85); border-radius: 15px; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; transition: 0.2s; }
+        .item-click-area { padding: 20px 10px; cursor: pointer; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .item-click-area:hover { background: rgba(255,255,255,0.08); }
-        
-        .item-btn-area { background: var(--bg-btn); padding: 10px; display: flex; justify-content: center; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.2s; font-size: 11px; font-weight: bold; color: var(--text-sub); }
+        .item-btn-area { background: var(--bg-btn); padding: 10px; display: flex; justify-content: center; border-top: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.2s; color: var(--text-sub); }
         .item-btn-area:hover { background: rgba(56, 189, 248, 0.15); color: var(--c-cyan); }
         
         .item-title { font-size: 11px; color: var(--text-sub); font-weight: bold; margin-bottom: 7px; text-align: center; }
         .item-val { font-size: 19px; font-weight: 900; letter-spacing: -0.5px; text-align: center; }
         
-        /* 작업 관리 버튼 */
+        /* 듀얼 버튼 (수동 작업용) */
         .task-btn-container { display: flex; width: 100%; border-top: 1px solid rgba(255,255,255,0.05); }
         .task-btn-half { flex: 1; padding: 10px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; }
         .task-btn-half:hover { background: rgba(255,255,255,0.1); }
-        .task-btn-del { background: #E11D48; }
-        .task-btn-del:hover { background: #BE123C; }
+        .task-btn-del { background: #E11D48; color: white; }
 
-        /* 🔥 컬러 피드백 복구 🔥 */
-        .text-cyan { color: var(--c-cyan); text-shadow: 0 0 10px rgba(0, 230, 246, 0.3); }
-        .text-purple { color: var(--c-purple); text-shadow: 0 0 10px rgba(157, 78, 221, 0.3); }
-        .text-rose { color: var(--c-rose); text-shadow: 0 0 10px rgba(244, 63, 94, 0.3); }
-        /* READY / END 상태 전용 컬러 */
-        .text-green { color: #4ADE80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.3); }
-        .text-red { color: #F87171; text-shadow: 0 0 10px rgba(248, 113, 113, 0.3); }
-        .text-white { color: #FFF; } .text-gray { color: #64748B; }
+        /* 컬러 클래스 */
+        .text-cyan { color: var(--c-cyan); } .text-purple { color: var(--c-purple); } .text-pink { color: var(--c-pink); }
+        .text-rose { color: var(--c-rose); } .text-sky { color: var(--c-sky); } .text-orange { color: var(--c-orange); }
+        .text-mint { color: var(--c-mint); } .text-white { color: #FFF; } .text-gray { color: #64748B; }
 
-        /* 설정 페이지 겹침 해결 */
-        .settings-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
-        .setting-card { width: 100%; max-width: 480px; }
-        .input-group { margin-bottom: 15px; width: 100%; }
-        .input-group label { display: block; font-size: 11px; color: var(--text-sub); margin-bottom: 5px; }
-        .input-group input { width: 100%; padding: 12px; border-radius: 10px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1); outline: none; }
-        .input-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .action-btn { background: var(--c-purple); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
-        .action-btn:active { transform: scale(0.98); }
-
-        /* 🔥 PC 모드 레이아웃 교정 (700px 이상이면 강제 PC모드) 🔥 */
-        @media (min-width: 701px) {
+        @media (min-width: 981px) {
             body { flex-direction: row; }
             .sidebar-wrapper { width: 75px; height: 100vh; border-bottom: none; border-right: 1px solid rgba(255,255,255,0.05); transition: width 0.3s; }
-            .sidebar-wrapper:hover { width: 230px; } /* 마우스 올리면 확장 */
-            
-            .sidebar { flex-direction: column; padding: 30px 15px; align-items: flex-start; }
+            .sidebar-wrapper:hover { width: 230px; }
+            .sidebar-wrapper:hover .txt { display: inline; margin-left: 5px; }
+            .sidebar { flex-direction: column; padding: 30px 15px; align-items: center; }
+            .sidebar-wrapper:hover .sidebar { align-items: flex-start; }
             .nav-group { flex-direction: column; width: 100%; margin-top: 40px; }
-            .nav-btn { width: 100%; justify-content: flex-start; }
-            
-            .txt { opacity: 0; width: 0; overflow: hidden; transition: opacity 0.2s, width 0.3s; }
-            .sidebar-wrapper:hover .txt { opacity: 1; width: auto; margin-left: 5px; } /* 확장 시 글자 보임 */
-            
+            .nav-btn { width: 100%; display: flex; justify-content: center; }
+            .sidebar-wrapper:hover .nav-btn { justify-content: flex-start; }
             .main-content { padding: 30px; }
             .row { flex-direction: row; align-items: stretch; }
-            .card { flex: 1; width: auto; } /* PC 대화면 비율 교정 */
+            .card { flex: 1; width: auto; }
             .card-stam { flex: 1.2; } .card-track { flex: 1.8; } .card-train { flex: 2.5; }
         }
 
-        dialog { margin: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; background: rgba(30,41,59,0.98); color: white; padding: 25px; width: 95%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        /* 모달 스타일 */
+        dialog { margin: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; background: rgba(30,41,59,0.98); color: white; padding: 25px; width: 95%; max-width: 420px; }
+        .dialog-btns { margin-top: 25px; display: flex; justify-content: space-between; gap: 10px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 11px; color: var(--text-sub); margin-bottom: 5px; }
+        .input-group input, .input-group select { width: 100%; padding: 12px; border-radius: 10px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1); outline: none; }
+        .input-group input:focus { border-color: var(--c-cyan); }
+        .action-btn { background: var(--c-purple); color: white; border: none; padding: 12px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
     </style>
 </head>
 <body>
     <input type="file" id="bgInput" accept="image/*" style="display: none;">
-    
     <div class="sidebar-wrapper">
         <div class="sidebar">
-            <div class="logo"><span>💎</span> <span class="txt">CRK PRO LIVE</span></div>
+            <div class="logo"><span>💎</span><span class="txt">PRO</span></div>
             <div class="nav-group">
-                <button class="nav-btn active" onclick="switchView('dashboard', this)">📊 <span class="txt">대시보드</span></button>
-                <button class="nav-btn" onclick="switchView('settings', this)">⚙️ <span class="txt">설정</span></button>
-                <button class="nav-btn" onclick="document.getElementById('bgInput').click()">🖼️ <span class="txt">배경 변경</span></button>
+                <button class="nav-btn active" onclick="switchView('dashboard', this)">📊<span class="txt"> 대시보드</span></button>
+                <button class="nav-btn" onclick="switchView('settings', this)">⚙️<span class="txt"> 설정</span></button>
             </div>
-            <div style="margin-top:auto" class="txt">
-                <p style="font-size:10px; color:var(--text-sub)">Sync: <span style="color:var(--c-green)">● ONLINE</span></p>
-            </div>
+            <button class="nav-btn" onclick="document.getElementById('bgInput').click()" style="margin-top:auto">🖼️<span class="txt"> 배경변경</span></button>
         </div>
     </div>
 
     <div class="main-content">
         <div id="dashboard" class="view-section active">
             <div class="row">
-                <div class="card card-stam"><div class="card-header"><span class="dot" style="background:var(--c-cyan)"></span> 에너지 관리</div><div class="item-grid" id="grid-stam"></div></div>
+                <div class="card card-stam"><div class="card-header"><span class="dot" style="background:var(--c-cyan)"></span> 에너지 관리 (시간 가변)</div><div class="item-grid" id="grid-stam"></div></div>
                 <div class="card card-track"><div class="card-header"><span class="dot" style="background:var(--c-purple)"></span> 시스템 트래킹</div><div class="item-grid" id="grid-track"></div></div>
             </div>
             <div class="row">
                 <div class="card"><div class="card-header"><span class="dot" style="background:var(--c-rose)"></span> 광산 탐사</div><div class="item-grid" id="exp-container"></div></div>
-                <div class="card card-train"><div class="card-header"><span class="dot" style="background:var(--c-pink)"></span> 물류 열차</div><div class="item-grid" id="grid-train"></div></div>
+                <div class="card card-train"><div class="card-header"><span class="dot" style="background:var(--c-pink)"></span> 물류 열차 (자동정렬)</div><div class="item-grid" id="grid-train"></div></div>
                 <div class="card"><div class="card-header"><span class="dot" style="background:var(--c-sky)"></span> 열기구</div><div class="item-grid" id="bal-container"></div></div>
             </div>
-            <div class="row"><div class="card"><div class="card-header"><span class="dot" style="background:var(--c-orange)"></span> 광맥 채굴</div><div class="item-grid" id="grid-mine"></div></div></div>
-            <div class="row" id="row-tasks" style="display:none;"><div class="card"><div class="card-header"><span class="dot" style="background:var(--c-mint)"></span> 생산 / 업그레이드</div><div class="item-grid" id="grid-tasks"></div></div></div>
+            <div class="row"><div class="card"><div class="card-header"><span class="dot" style="background:var(--c-orange)"></span> 광맥 채굴 (자동정렬)</div><div class="item-grid" id="grid-mine"></div></div></div>
+            <div class="row" id="row-tasks" style="display:none;"><div class="card"><div class="card-header"><span class="dot" style="background:var(--c-mint)"></span> 생산 / 업그레이드 (자동정렬)</div><div class="item-grid" id="grid-tasks"></div></div></div>
         </div>
 
         <div id="settings" class="view-section">
-            <div class="settings-container">
-                <div class="card setting-card">
+            <div style="display:flex; flex-wrap:wrap; gap:20px; justify-content: center;">
+                <div class="card" style="width:100%; max-width:480px;">
                     <div class="card-header">⚙️ 프로젝트 수동 등록</div>
-                    <div class="input-group"><label>작업명</label><input type="text" id="mName" placeholder="예: 쿠키성 Lv.15"></div>
-                    <div class="input-row">
-                        <div class="input-group"><label>일</label><input type="number" id="mD" value="0"></div>
-                        <div class="input-group"><label>시</label><input type="number" id="mH" value="0"></div>
-                        <div class="input-group"><label>분</label><input type="number" id="mM" value="0"></div>
-                    </div>
-                    <button class="action-btn" style="margin-top:10px;" onclick="addTask()">등록하기</button>
+                    <div class="input-group"><label>작업명</label><input type="text" id="mName" placeholder="예: 쿠키성 Lv.15" onkeydown="if(event.keyCode==13)addTask()"></div>
+                    <div style="display:flex; gap:10px;"><input type="number" id="mD" value="0" style="flex:1" onkeydown="if(event.keyCode==13)addTask()">일 <input type="number" id="mH" value="0" style="flex:1" onkeydown="if(event.keyCode==13)addTask()">시 <input type="number" id="mM" value="0" style="flex:1" onkeydown="if(event.keyCode==13)addTask()">분</div>
+                    <button class="action-btn" style="margin-top:20px; width:100%" onclick="addTask()">등록하기</button>
                 </div>
-                <div class="card setting-card" style="border-color:var(--c-green);">
+                <div class="card" style="width:100%; max-width:480px; border-color:var(--c-green);">
                     <div class="card-header">🔄 데이터 복구 (기존 코드)</div>
                     <textarea id="legacyCode" style="width:100%; height:80px; background:rgba(0,0,0,0.3); color:white; padding:10px; border-radius:10px; border: 1px solid rgba(255,255,255,0.1); font-size:10px; margin-bottom:10px; resize:none;"></textarea>
-                    <button class="action-btn" style="background:var(--c-green); color:#000" onclick="recoverLegacyData()">클라우드로 복구하기</button>
+                    <button class="action-btn" style="background:var(--c-green); color:#000; width:100%" onclick="recoverLegacyData()">클라우드로 복구하기</button>
                 </div>
             </div>
-            <div style="text-align:center; margin-top:50px;">
-                <button style="background:transparent; border:none; color:#475569; font-size:11px; text-decoration:underline; cursor:pointer;" onclick="if(confirm('모든 데이터를 삭제할까요?')){db.ref('crk_data').set(INITIAL_STATE); location.reload();}">앱 데이터 전체 초기화</button>
-            </div>
+            <div style="text-align:center; margin-top:50px;"><button style="background:transparent; border:none; color:#475569; font-size:11px; text-decoration:underline; cursor:pointer;" onclick="if(confirm('모든 데이터를 삭제할까요?')){db.ref('crk_data').set(INITIAL_STATE); location.reload();}">앱 데이터 전체 초기화</button></div>
         </div>
     </div>
 
     <dialog id="setupModal">
         <h3 id="setupTitle" style="margin-bottom:15px;">설정</h3>
         <div id="setupBody"></div>
-        <div style="margin-top:20px; display:flex; gap:10px; justify-content: space-between;">
-            <button class="action-btn" style="background:var(--c-cyan); color:#000; width: auto;" onclick="applySetup()">확인</button>
+        <div class="dialog-btns">
+            <button class="action-btn" style="background:var(--c-cyan); color:#000" onclick="applySetup()">확인</button>
             <div style="display:flex; gap:10px;">
-                <button id="btnReset" class="action-btn" style="background:var(--c-rose); width: auto;" onclick="resetSetup()">리셋</button>
-                <button class="action-btn" style="background:#334155; width: auto;" onclick="document.getElementById('setupModal').close()">취소</button>
+                <button id="btnReset" class="action-btn" style="background:var(--c-rose)" onclick="resetSetup()">리셋</button>
+                <button class="action-btn" style="background:#334155" onclick="document.getElementById('setupModal').close()">취소</button>
             </div>
         </div>
     </dialog>
-    <dialog id="accelModal"><h3 id="accelTitle" style="margin-bottom:15px;">가속</h3><div id="accelOptions" class="item-grid" style="grid-template-columns: 1fr 1fr;"></div><button class="action-btn" style="margin-top:20px;" onclick="applyAccel()">적용</button><button class="action-btn" style="background:#334155; margin-top:10px;" onclick="document.getElementById('accelModal').close()">취소</button></dialog>
+    <dialog id="accelModal">
+        <h3 id="accelTitle" style="margin-bottom:15px;">가속</h3>
+        <div id="accelOptions" class="item-grid" style="grid-template-columns: 1fr 1fr;"></div>
+        <button class="action-btn" style="margin-top:20px; width:100%" onclick="applyAccel()">적용</button>
+        <button class="action-btn" style="background:#334155; margin-top:10px; width:100%" onclick="document.getElementById('accelModal').close()">취소</button>
+    </dialog>
 
 <script>
-    // Firebase 설정
     const firebaseConfig = {
         apiKey: "AIzaSyC7JjMhgFb6qw_NloERkHIwil9id-UOcJI",
         authDomain: "my-crk-timer.firebaseapp.com",
@@ -183,25 +162,72 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const INITIAL_STATE = { kp:false, bg:"", stam:{normal:{c:0, m:208, e:0}, thick:{c:0, m:140, e:0}, fate:{c:0, m:100, e:0}}, arena:0, fount:Math.floor(Date.now()/1000), prod:0, exp:0, bear_train:[0,0,0], bear_balloon:0, mining:[0,0,0,0,0,0], tasks:[] };
+    // 🔥 INITIAL_STATE에 개당 충전 시간(u) 추가 (초 단위) 🔥
+    const INITIAL_STATE = { 
+        kp:false, bg:"", 
+        stam:{
+            normal:{c:0, m:208, e:0, u:300}, // 기본 5분(300초)
+            thick:{c:0, m:140, e:0, u:540},  // 두툼 9분(540초)
+            fate:{c:0, m:100, e:0, u:1080}   // 운명 18분(1080초)
+        }, 
+        arena:0, fount:Math.floor(Date.now()/1000), prod:0, exp:0, bear_train:[0,0,0], bear_balloon:0, mining:[0,0,0,0,0,0], tasks:[] 
+    };
     let state = JSON.parse(JSON.stringify(INITIAL_STATE));
     let tAccel=null, tSetup=null, notified={};
 
     db.ref('crk_data').on('value', (s) => {
         const v = s.val();
-        if(v) { state = Object.assign(state, v); if(state.bg) document.body.style.backgroundImage = `url('${state.bg}')`; render(); } 
+        if(v) { 
+            state = Object.assign(state, v); 
+            // 구버전 데이터와 호환성 유지 (u가 없는 경우 대비)
+            if(!state.stam.normal.u) { state.stam.normal.u=300; state.stam.thick.u=540; state.stam.fate.u=1080; }
+            if(state.bg) document.body.style.backgroundImage = `url('${state.bg}')`; 
+            render(); 
+        } 
         else { db.ref('crk_data').set(INITIAL_STATE); }
     });
 
     function save() { db.ref('crk_data').update(state); }
-    function notify(id, m) { if(!notified[id]) { notified[id]=true; if(window.qt){ new QWebChannel(qt.webChannelTransport, function(c){c.objects.backend.show_toast("CRK 알림", m);}); } } }
+    function notify(id, m) { if(!notified[id]) { notified[id]=true; if(window.qt){ new QWebChannel(qt.webChannelTransport, function(c){c.objects.backend.show_toast("CRK", m);}); } } }
     function fmt(s) { if(s<=0) return "00:00:00"; let d=Math.floor(s/86400), h=Math.floor((s%86400)/3600), m=Math.floor((s%3600)/60), sc=Math.floor(s%60); let t=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${sc.toString().padStart(2,'0')}`; return d>0 ? `${d}d ${t}` : t; }
     function switchView(v, b) { document.querySelectorAll('.view-section').forEach(e => e.classList.remove('active')); document.getElementById(v).classList.add('active'); document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active')); b.classList.add('active'); }
 
+    // 🔥 엔터 키 범용 핸들러 🔥
+    window.onkeydown = function(e) {
+        if(e.keyCode === 13) {
+            if(document.getElementById('setupModal').open) applySetup();
+            else if(document.getElementById('accelModal').open) applyAccel();
+        }
+    };
+
     function clickTracking(t) { let n = Math.floor(Date.now()/1000); if(t==='arena'){ if(state.arena>n) state.arena=0; else {state.arena=n+(state.kp?600:1800); notified['arena']=false;} } else if(t==='fount') state.fount=n; else if(t==='prod') state.prod=(state.prod>0)?0:n; save(); }
-    function openStamModal(k, t) { tSetup='stam_'+k; document.getElementById('setupTitle').innerText=t; document.getElementById('setupBody').innerHTML=`<div class="input-group"><label>현재 / 최대</label><div style="display:flex; gap:10px;"><input type="number" id="sC" value="${state.stam[k].c}"> / <input type="number" id="sM" value="${state.stam[k].m}"></div></div>`; document.getElementById('btnReset').style.display='none'; document.getElementById('setupModal').showModal(); }
+    
+    // 🔥 에너지 모달: 개당 충전 시간 설정 추가 🔥
+    function openStamModal(k, t) { 
+        tSetup='stam_'+k; 
+        document.getElementById('setupTitle').innerText=t; 
+        document.getElementById('setupBody').innerHTML=`
+            <div class="input-group"><label>현재 / 최대</label><div style="display:flex; gap:10px;"><input type="number" id="sC" value="${state.stam[k].c}"> / <input type="number" id="sM" value="${state.stam[k].m}"></div></div>
+            <div class="input-group"><label>개당 충전 시간 (분 단위)</label><input type="number" step="0.1" id="sU" value="${(state.stam[k].u/60).toFixed(1)}"></div>
+        `; 
+        document.getElementById('btnReset').style.display='none'; 
+        document.getElementById('setupModal').showModal(); 
+    }
+
     function openSetupModal(id, t) { tSetup=id; document.getElementById('setupTitle').innerText=t; document.getElementById('btnReset').style.display='block'; let h=`<div class="input-group"><label>시 : 분</label><div style="display:flex; gap:10px;"><input type="number" id="setH" placeholder="시"> : <input type="number" id="setM" placeholder="분"></div></div>`; if(id==='exp'||id.startsWith('m_')) h=`<select id="setT" style="margin-bottom:10px; width:100%; padding:10px; border-radius:8px; background:#000; color:white;"><option value="custom">직접입력</option><option value="8">8시간</option><option value="11.5">11.5시간</option><option value="24">24시간</option></select>`+h; document.getElementById('setupBody').innerHTML=h; document.getElementById('setupModal').showModal(); }
-    function applySetup() { let n = Math.floor(Date.now()/1000); if(tSetup.startsWith('stam_')){ let k=tSetup.split('_')[1], c=parseInt(document.getElementById('sC').value)||0, m=parseInt(document.getElementById('sM').value)||1; let u=(k==='normal'&&state.kp)?240:300; if(k==='thick') u=600; if(k==='fate') u=900; state.stam[k].c=c; state.stam[k].m=m; state.stam[k].e=(c<m)?n+(m-c)*u:0; } else { let sec=0; if(document.getElementById('setT') && document.getElementById('setT').value!=='custom') sec=parseFloat(document.getElementById('setT').value)*3600; else sec=(parseInt(document.getElementById('setH').value)||0)*3600+(parseInt(document.getElementById('setM').value)||0)*60; if(sec>0){ if(tSetup==='exp') state.exp=n+sec; else if(tSetup.startsWith('tr_')) state.bear_train[tSetup.split('_')[1]]=n+sec; else if(tSetup==='bal') state.bear_balloon=n+sec; else if(tSetup.startsWith('m_')) state.mining[tSetup.split('_')[1]]=n+sec; else if(tSetup.startsWith('t_')) state.tasks[tSetup.split('_')[1]].end=n+sec; } } save(); document.getElementById('setupModal').close(); }
+    
+    function applySetup() { 
+        let n = Math.floor(Date.now()/1000); 
+        if(tSetup.startsWith('stam_')){ 
+            let k=tSetup.split('_')[1], c=parseInt(document.getElementById('sC').value)||0, m=parseInt(document.getElementById('sM').value)||1, u=parseFloat(document.getElementById('sU').value)*60||300; 
+            state.stam[k].c=c; state.stam[k].m=m; state.stam[k].u=u; state.stam[k].e=(c<m)?n+(m-c)*u:0; 
+        } else { 
+            let sec=0; if(document.getElementById('setT') && document.getElementById('setT').value!=='custom') sec=parseFloat(document.getElementById('setT').value)*3600; else sec=(parseInt(document.getElementById('setH').value)||0)*3600+(parseInt(document.getElementById('setM').value)||0)*60; 
+            if(sec>0){ if(tSetup==='exp') state.exp=n+sec; else if(tSetup.startsWith('tr_')) state.bear_train[tSetup.split('_')[1]]=n+sec; else if(tSetup==='bal') state.bear_balloon=n+sec; else if(tSetup.startsWith('m_')) state.mining[tSetup.split('_')[1]]=n+sec; else if(tSetup.startsWith('t_')) state.tasks[tSetup.split('_')[1]].end=n+sec; } 
+        } 
+        save(); document.getElementById('setupModal').close(); 
+    }
+
     function resetSetup() { if(tSetup==='exp') state.exp=0; else if(tSetup.startsWith('tr_')) state.bear_train[tSetup.split('_')[1]]=0; else if(tSetup==='bal') state.bear_balloon=0; else if(tSetup.startsWith('m_')) state.mining[tSetup.split('_')[1]]=0; save(); document.getElementById('setupModal').close(); }
     function openAccelModal(id, t) { if(event) event.stopPropagation(); tAccel=id; let opts=[["1분",60],["10분",600],["1시간",3600],["12시간",43200]]; let h=''; opts.forEach((o,i)=>h+=`<div><label style="font-size:11px;">${o[0]}</label><input type="number" id="accel_${i}" value="0" style="width:100%; padding:8px; border-radius:5px; background:#000; color:white; border:1px solid #333;"></div>`); document.getElementById('accelOptions').innerHTML = h; document.getElementById('accelModal').showModal(); }
     function applyAccel() { let opts=[60,600,3600,43200], tot=0; opts.forEach((s,i)=>tot+=s*(parseInt(document.getElementById(`accel_${i}`).value)||0)); if(tot>0){ let n=Math.floor(Date.now()/1000); if(tAccel==='exp') state.exp=Math.max(n, state.exp-tot); else if(tAccel.startsWith('tr_')) state.bear_train[tAccel.split('_')[1]]=Math.max(n, state.bear_train[tAccel.split('_')[1]]-tot); else if(tAccel==='bal') state.bear_balloon=Math.max(n, state.bear_balloon-tot); else if(tAccel.startsWith('m_')) state.mining[tAccel.split('_')[1]]=Math.max(n, state.mining[tAccel.split('_')[1]]-tot); else if(tAccel.startsWith('t_')) state.tasks[tAccel.split('_')[1]].end=Math.max(n, state.tasks[tAccel.split('_')[1]].end-tot); save(); } document.getElementById('accelModal').close(); }
@@ -209,22 +235,23 @@
     function recoverLegacyData() { try { const d = JSON.parse(decodeURIComponent(atob(document.getElementById('legacyCode').value.trim()))); if(confirm("클라우드 데이터를 덮어씌울까요?")) { db.ref('crk_data').set(d).then(()=>alert("복구 성공!")); } } catch(e){ alert("잘못된 코드"); } }
     document.getElementById('bgInput').addEventListener('change', function(e) { const f = e.target.files[0]; if(f){ const r = new FileReader(); r.onload = function(evt){ state.bg = evt.target.result; save(); document.body.style.backgroundImage = `url('${state.bg}')`; }; r.readAsDataURL(f); } });
 
-    // 🔥 drawItem 함수 수정: READY / END 컬러 피드백 복구 🔥
+    function getSortedIndices(arr, now) {
+        return arr.map((v, i) => i).sort((a, b) => {
+            let eA = arr[a], eB = arr[b];
+            let isRunningA = eA > now, isRunningB = eB > now;
+            if (isRunningA && !isRunningB) return -1;
+            if (!isRunningA && isRunningB) return 1;
+            if (isRunningA && isRunningB) return eA - eB;
+            return a - b;
+        });
+    }
+
     function drawItem(title, end, id, theme, isT=false, idx=0) {
         let n=Math.floor(Date.now()/1000), run=end>n, isE=end>0 && end<=n;
         let vStr, vCls;
-        
-        if (run) {
-            vStr = fmt(end-n);
-            vCls = theme; // 진행 중일 때는 테마 색상 (rose, cyan 등)
-        } else if (isE) {
-            vStr = "END";
-            vCls = "text-red"; // 완료 상태는 빨간색
-        } else {
-            vStr = "READY";
-            vCls = "text-green"; // 준비 상태는 초록색
-        }
-        
+        if (run) { vStr = fmt(end-n); vCls = theme; } 
+        else if (isE) { vStr = "READY"; vCls = "text-gray"; } 
+        else { vStr = "READY"; vCls = "text-gray"; }
         let btn = isT ? `<div class="task-btn-container"><div class="task-btn-half" onclick="openAccelModal('${id}','${title}')">▶▶▶</div><div class="task-btn-half task-btn-del" onclick="event.stopPropagation(); state.tasks.splice(${idx},1); save();">✖</div></div>` : `<div class="item-btn-area" onclick="openAccelModal('${id}','${title}')">▶▶▶</div>`;
         return `<div class="item"><div class="item-click-area" onclick="openSetupModal('${isT?'t_'+idx:id}','${title}')"><div class="item-title">${title}</div><div class="item-val ${vCls}">${vStr}</div></div>${btn}</div>`;
     }
@@ -232,24 +259,29 @@
     function render() {
         const now = Math.floor(Date.now()/1000);
         if(!document.getElementById('grid-stam')) return;
+        
+        // 에너지 (가변 시간 u 적용)
         let h_s=''; ['normal','thick','fate'].forEach(k => {
             let d=state.stam[k], r=d.e-now, n = k==='normal'?'기본':k==='thick'?'두툼':'운명';
-            let u=(k==='normal'&&state.kp)?240:300; if(k==='thick') u=600; if(k==='fate') u=900;
+            let u=d.u || (k==='normal'?300:k==='thick'?540:1080);
             if(r>0) h_s += `<div class="item"><div class="item-click-area" onclick="openStamModal('${k}','${n}')"><div class="item-title">${n}</div><div class="item-val text-white">${d.m-Math.ceil(r/u)}/${d.m}</div><div class="text-cyan" style="font-size:10px;">${fmt(r)}</div></div></div>`;
             else h_s += `<div class="item"><div class="item-click-area" onclick="openStamModal('${k}','${n}')"><div class="item-title">${n}</div><div class="item-val text-cyan">MAX</div></div></div>`;
         });
         document.getElementById('grid-stam').innerHTML = h_s;
-        document.getElementById('grid-track').innerHTML = `<div class="item"><div class="item-click-area" onclick="clickTracking('arena')"><div class="item-title">아레나</div><div class="item-val text-purple">${state.arena>now?fmt(state.arena-now):'READY'}</div></div></div><div class="item"><div class="item-click-area" onclick="clickTracking('fount')"><div class="item-title">분수</div><div class="item-val text-white">${fmt(now-state.fount)}</div></div></div><div class="item"><div class="item-click-area" onclick="clickTracking('prod')"><div class="item-title">생산</div><div class="item-val text-white">${state.prod>0?fmt(now-state.prod):'OFF'}</div></div></div>`;
+
+        document.getElementById('grid-track').innerHTML = `<div class="item"><div class="item-click-area" onclick="clickTracking('arena')"><div class="item-title">아레나</div><div class="item-val ${state.arena>now?'text-purple':'text-gray'}">${state.arena>now?fmt(state.arena-now):'READY'}</div></div></div><div class="item"><div class="item-click-area" onclick="clickTracking('fount')"><div class="item-title">분수</div><div class="item-val text-white">${fmt(now-state.fount)}</div></div></div><div class="item"><div class="item-click-area" onclick="clickTracking('prod')"><div class="item-title">생산</div><div class="item-val text-white">${state.prod>0?fmt(now-state.prod):'OFF'}</div></div></div>`;
         document.getElementById('exp-container').innerHTML = drawItem("광산 탐사", state.exp, "exp", "text-rose");
-        let h_tr=''; [0,1,2].forEach(i => h_tr += drawItem("물류 열차", state.bear_train[i], 'tr_'+i, "text-pink")); document.getElementById('grid-train').innerHTML = h_tr;
+        let h_tr=''; getSortedIndices(state.bear_train, now).forEach(i => h_tr += drawItem("물류 열차", state.bear_train[i], 'tr_'+i, "text-pink")); document.getElementById('grid-train').innerHTML = h_tr;
         document.getElementById('bal-container').innerHTML = drawItem("열기구", state.bear_balloon, "bal", "text-sky");
-        let h_m=''; [0,1,2,3,4,5].forEach(i => h_m += drawItem("광맥 채굴", state.mining[i], 'm_'+i, "text-orange")); document.getElementById('grid-mine').innerHTML = h_m;
+        let h_m=''; getSortedIndices(state.mining, now).forEach(i => h_m += drawItem("광맥 채굴", state.mining[i], 'm_'+i, "text-orange")); document.getElementById('grid-mine').innerHTML = h_m;
+        
         if(state.tasks && state.tasks.length>0){
             document.getElementById('row-tasks').style.display='flex';
-            let sortedT = state.tasks.map((t,i)=>({...t, orig:i})).sort((a,b)=>{ let sA=(a.end>now)?1:(a.end>0?2:3), sB=(b.end>now)?1:(b.end>0?2:3); return sA!==sB?sA-sB:(sA===1?a.end-b.end:a.orig-b.orig); });
-            let h_t=''; sortedT.forEach(t=>{ h_t+=drawItem(t.name, t.end, 't_'+t.orig, "text-mint", true, t.orig); if(t.end>0 && t.end<=now) notify('t'+t.orig, t.name+' 완료!'); });
+            const taskTimes = state.tasks.map(t => t.end);
+            let h_t=''; getSortedIndices(taskTimes, now).forEach(i => h_t += drawItem(state.tasks[i].name, state.tasks[i].end, 't_'+i, "text-mint", true, i));
             document.getElementById('grid-tasks').innerHTML = h_t;
         } else document.getElementById('row-tasks').style.display='none';
+
         if(state.arena>0 && state.arena<=now) notify('arena','아레나 준비!');
         if(state.exp>0 && state.exp<=now) notify('exp','탐사 완료!');
     }
