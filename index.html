@@ -131,7 +131,7 @@
         .action-btn:hover { filter: brightness(1.2); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(157, 78, 221, 0.3); }
         .dialog-btns { margin-top: 20px; display: flex; gap: 10px; }
 
-        /* Text Colors (복구) */
+        /* Text Colors */
         .text-cyan { color: var(--c-cyan); } .text-purple { color: var(--c-purple); } .text-pink { color: var(--c-pink); }
         .text-rose { color: var(--c-rose); } .text-sky { color: var(--c-sky); } .text-orange { color: var(--c-orange); }
         .text-mint { color: var(--c-mint); } .text-white { color: #FFF; } .text-gray { color: #64748B; }
@@ -170,7 +170,6 @@
     </div>
 
     <div class="main-content">
-        <!-- 1. 대시보드 -->
         <div id="dashboard" class="view-section active">
             <div class="card card-stam"><div class="energy-grid" id="main-energy-grid"></div></div>
             <div class="card card-homework">
@@ -186,7 +185,6 @@
             </div>
         </div>
 
-        <!-- 2. 타임보드 -->
         <div id="timeboard" class="view-section">
             <div class="card card-track"><div class="item-grid" id="grid-track"></div></div>
             <div class="card card-dispatch"><div class="item-grid" id="grid-dispatch"></div></div>
@@ -194,7 +192,6 @@
             <div id="row-tasks" style="display:none;" class="card card-tasks"><div class="item-grid" id="grid-tasks" style="grid-template-columns: repeat(3, 1fr) !important;"></div></div>
         </div>
 
-        <!-- 3. 설정 -->
         <div id="settings" class="view-section">
             <div class="card card-track">
                 <div style="font-size:15px; font-weight:800; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">🕒 타이머 수동 등록</div>
@@ -229,7 +226,7 @@
 
     <dialog id="aiModal">
         <h3 style="margin-bottom:15px; font-weight: 800; color: var(--c-cyan);">✨ AI 운영 비서</h3>
-        <div id="aiBody" class="ai-content"><div style="text-align:center; padding:20px;"><span class="loading-dots">전략을 분석 중입니다</span></div></div>
+        <div id="aiBody" class="ai-content"><div style="text-align:center; padding:20px;"><span class="loading-dots">전략 분석 중</span></div></div>
         <div class="dialog-btns"><button class="action-btn" style="background:var(--c-cyan); color:#000;" onclick="document.getElementById('aiModal').close()">알겠습니다</button></div>
     </dialog>
 
@@ -280,8 +277,7 @@
     async function getAIBriefing() {
         document.getElementById('aiBody').innerHTML = '<div style="text-align:center; padding:20px;"><span class="loading-dots">전략 분석 중</span></div>';
         document.getElementById('aiModal').showModal();
-        const now = Math.floor(Date.now()/1000);
-        const summary = { energy: state.stam, tickets: state.arena_tickets, homework: state.homework.items, tasks: state.tasks.length, post: state.postOffice.count };
+        const summary = { energy: state.stam, tickets: state.arena_tickets, homework: state.homework.items, post: state.postOffice.count };
         const advice = await callGemini(`사용자 상태: ${JSON.stringify(summary)}. 지금 가장 시급한 작업과 효율적인 전략 제안.`);
         document.getElementById('aiBody').innerHTML = `<div class="ai-text">${advice.replace(/\n/g, '<br>')}</div>`;
     }
@@ -302,7 +298,18 @@
     });
 
     function save() { db.ref('crk_data').update(state); }
-    function notify(id, m) { if(!notified[id]) { notified[id]=true; if(window.qt && window.qt.webChannelTransport){ new QWebChannel(qt.webChannelTransport, function(c){c.objects.backend.show_toast("CRK 알림", m);}); } } }
+
+    function notify(id, m) { 
+        if(!notified[id]) { 
+            notified[id]=true; 
+            if(window.qt && window.qt.webChannelTransport){ 
+                new QWebChannel(qt.webChannelTransport, function(c){
+                    c.objects.backend.show_toast("CRK 알림", m);
+                }); 
+            } 
+        } 
+    }
+
     function fmt(s) { if(s<=0) return "00:00:00"; let d=Math.floor(s/86400), h=Math.floor((s%86400)/3600), m=Math.floor((s%3600)/60), sc=Math.floor(s%60); let t=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${sc.toString().padStart(2,'0')}`; return d>0 ? `${d}d ${t}` : t; }
     
     function switchView(v, b) { 
@@ -329,6 +336,7 @@
 
     function render() {
         const now = Math.floor(Date.now()/1000); const dt = new Date();
+        
         let h_e=''; 
         [['stam','normal','기본'],['stam','thick','두툼'],['stam','fate','운명']].forEach(([p,k,n]) => {
             let d=state[p][k], r=d.e-now, isMax=r<=0;
@@ -338,10 +346,16 @@
             let d=state.arena_tickets[k], r=d.e-now, isMax=r<=0;
             h_e += `<div class="item ${isMax?'is-max':''}" onclick="openCounterModal('${p}','${k}','${n}')"><div class="item-click-area"><div class="item-title">${n}</div><div class="item-val ${isMax?'text-pink':'text-white'}">${isMax?'MAX':(d.m-Math.ceil(r/d.u))+'/'+d.m}</div>${!isMax?`<div class="item-subtext">${fmt(r)}</div>`:''}</div></div>`;
         });
+
         if(state.postOffice.count < 3) {
             const h = dt.getHours(); const m = dt.getMinutes(); const isEvenHour = h % 2 === 0; const isPostTime = isEvenHour && m <= 20;
-            if(isPostTime) h_e += `<div class="item is-alert" onclick="claimPostOffice()"><div class="item-click-area"><div class="item-title text-rose">우체국</div><div class="item-val text-rose">READY</div><div class="item-subtext">${state.postOffice.count}/3 수령</div></div></div>`;
-            else { let targetH = isEvenHour ? h+2 : h+1; let td = new Date(dt); td.setHours(targetH,0,0,0); h_e += `<div class="item" style="opacity:0.7;"><div class="item-click-area"><div class="item-title">우체국</div><div class="item-val text-gray" style="font-size:14px;">${fmt(Math.floor((td-dt)/1000))}</div><div class="item-subtext">${state.postOffice.count}/3 수령</div></div></div>`; }
+            if(isPostTime) {
+                h_e += `<div class="item is-alert" onclick="claimPostOffice()"><div class="item-click-area"><div class="item-title text-rose">우체국</div><div class="item-val text-rose">READY</div><div class="item-subtext">${state.postOffice.count}/3 수령</div></div></div>`;
+                notify('postoffice_' + h, '우체국 보상 수령 시간입니다! (READY)');
+            } else {
+                let targetH = isEvenHour ? h+2 : h+1; let td = new Date(dt); td.setHours(targetH,0,0,0);
+                h_e += `<div class="item" style="opacity:0.7;"><div class="item-click-area"><div class="item-title">우체국</div><div class="item-val text-gray" style="font-size:14px;">${fmt(Math.floor((td-dt)/1000))}</div><div class="item-subtext">${state.postOffice.count}/3 수령</div></div></div>`;
+            }
         }
         document.getElementById('main-energy-grid').innerHTML = h_e;
 
@@ -374,9 +388,16 @@
         document.getElementById('grid-mine').innerHTML = h_m;
         if(state.tasks && state.tasks.length>0){
             document.getElementById('row-tasks').style.display='block';
-            let h_t=''; state.tasks.forEach((t, i) => { h_t += drawItem(t.name, t.end, 't_'+i, "text-mint", true, i); if(t.end>0 && t.end<=now) notify('t_'+i, t.name+' 완료!'); });
+            let h_t=''; state.tasks.forEach((t, i) => { 
+                h_t += drawItem(t.name, t.end, 't_'+i, "text-mint", true, i); 
+                if(t.end>0 && t.end<=now) notify('t_'+i, t.name+' 완료!'); 
+            });
             document.getElementById('grid-tasks').innerHTML = h_t;
         } else document.getElementById('row-tasks').style.display='none';
+
+        if(state.exp>0 && state.exp<=now) notify('exp', '탐사 완료!');
+        if(state.trade>0 && state.trade<=now) notify('trade', '무역소 갱신!');
+        if(state.bear_balloon>0 && state.bear_balloon<=now) notify('bal', '열기구 도착!');
     }
     setInterval(render, 1000);
 </script>
