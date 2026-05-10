@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CRK PRO LIVE v14.2</title>
+    <title>CRK PRO LIVE v14.3</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
@@ -28,7 +28,7 @@
         .nav-btn.active { color: var(--text-main); background: rgba(255,255,255,0.1); }
 
         .main-content { flex: 1; padding: 15px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        .view-section { display: none; width: 100%; max-width: 1600px; margin: 0 auto; }
+        .view-section { display: none; width: 100%; max-width: 1650px; margin: 0 auto; }
         .view-section.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -69,8 +69,12 @@
             .sidebar-wrapper:hover .nav-btn { justify-content: flex-start; }
             .main-content { padding: 30px; }
             .row { flex-direction: row; align-items: stretch; }
-            .card { flex: 1; width: auto; }
-            .card-stam { flex: 1.1; } .card-track { flex: 2.2; } /* 보라색 섹션 자리 확보 */
+            .card { width: auto; }
+            .card-stam { flex: 1.1; } .card-track { flex: 2.2; }
+            /* 🔥 요청 사항: 광산/열기구는 좁게, 열차는 넓게 🔥 */
+            .card-exp { flex: 0.8; }
+            .card-bal { flex: 0.8; }
+            .card-train { flex: 2.5; }
         }
 
         dialog { margin: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; background: rgba(30,41,59,0.98); color: white; padding: 25px; width: 95%; max-width: 420px; }
@@ -101,9 +105,9 @@
                 <div class="card card-track"><div class="card-header"><span class="dot" style="background:var(--c-purple)"></span> 시스템 트래킹</div><div class="item-grid" id="grid-track"></div></div>
             </div>
             <div class="row">
-                <div class="card"><div class="card-header"><span class="dot" style="background:var(--c-rose)"></span> 광산 탐사</div><div class="item-grid" id="exp-container"></div></div>
+                <div class="card card-exp"><div class="card-header"><span class="dot" style="background:var(--c-rose)"></span> 광산 탐사</div><div class="item-grid" id="exp-container"></div></div>
+                <div class="card card-bal"><div class="card-header"><span class="dot" style="background:var(--c-sky)"></span> 열기구</div><div class="item-grid" id="bal-container"></div></div>
                 <div class="card card-train"><div class="card-header"><span class="dot" style="background:var(--c-pink)"></span> 물류 열차 (자동정렬)</div><div class="item-grid" id="grid-train"></div></div>
-                <div class="card"><div class="card-header"><span class="dot" style="background:var(--c-sky)"></span> 열기구</div><div class="item-grid" id="bal-container"></div></div>
             </div>
             <div class="row"><div class="card"><div class="card-header"><span class="dot" style="background:var(--c-orange)"></span> 광맥 채굴 (자동정렬)</div><div class="item-grid" id="grid-mine"></div></div></div>
             <div class="row" id="row-tasks" style="display:none;"><div class="card"><div class="card-header"><span class="dot" style="background:var(--c-mint)"></span> 생산 / 업그레이드 (자동정렬)</div><div class="item-grid" id="grid-tasks"></div></div></div>
@@ -123,7 +127,7 @@
                     <button class="action-btn" style="background:var(--c-green); color:#000; width:100%" onclick="recoverLegacyData()">클라우드로 복구하기</button>
                 </div>
             </div>
-            <div style="text-align:center; margin-top:50px;"><button style="background:transparent; border:none; color:#475569; font-size:11px; text-decoration:underline; cursor:pointer;" onclick="if(confirm('모든 데이터를 삭제할까요?')){db.ref('crk_data').set(INITIAL_STATE); location.reload();}">앱 데이터 전체 초기화</button></div>
+            <div style="text-align:center; margin-top:50px;"><button style="background:transparent; border:none; color:#475569; font-size:11px; text-decoration:underline; cursor:pointer;" onclick="if(confirm('모든 데이터를 삭제할까요?')){db.ref('crk_data').set(INITIAL_STATE); location.reload();}">클라우드 초기화</button></div>
         </div>
     </div>
 
@@ -153,7 +157,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 🔥 trade(무역소) 상태 추가 🔥
     const INITIAL_STATE = { 
         kp:false, bg:"", 
         stam:{ normal:{c:0, m:208, e:0, u:300}, thick:{c:0, m:140, e:0, u:540}, fate:{c:0, m:100, e:0, u:1080} }, 
@@ -173,13 +176,7 @@
     function fmt(s) { if(s<=0) return "00:00:00"; let d=Math.floor(s/86400), h=Math.floor((s%86400)/3600), m=Math.floor((s%3600)/60), sc=Math.floor(s%60); let t=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${sc.toString().padStart(2,'0')}`; return d>0 ? `${d}d ${t}` : t; }
     function switchView(v, b) { document.querySelectorAll('.view-section').forEach(e => e.classList.remove('active')); document.getElementById(v).classList.add('active'); document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active')); b.classList.add('active'); }
 
-    // 🔥 엔터 키 지원 🔥
-    window.onkeydown = function(e) {
-        if(e.keyCode === 13) {
-            if(document.getElementById('setupModal').open) applySetup();
-            else if(document.getElementById('accelModal').open) applyAccel();
-        }
-    };
+    window.onkeydown = function(e) { if(e.keyCode === 13) { if(document.getElementById('setupModal').open) applySetup(); else if(document.getElementById('accelModal').open) applyAccel(); } };
 
     function clickTracking(t) { 
         let n = Math.floor(Date.now()/1000); 
@@ -191,78 +188,31 @@
     }
     
     function openStamModal(k, t) { tSetup='stam_'+k; document.getElementById('setupTitle').innerText=t; document.getElementById('setupBody').innerHTML=`<div class="input-group"><label>현재 / 최대</label><div style="display:flex; gap:10px;"><input type="number" id="sC" value="${state.stam[k].c}"> / <input type="number" id="sM" value="${state.stam[k].m}"></div></div><div class="input-group"><label>개당 충전 시간 (분)</label><input type="number" step="0.1" id="sU" value="${(state.stam[k].u/60).toFixed(1)}"></div>`; document.getElementById('btnReset').style.display='none'; document.getElementById('setupModal').showModal(); }
-    
-    function openSetupModal(id, t) { 
-        tSetup=id; 
-        document.getElementById('setupTitle').innerText=t; 
-        document.getElementById('btnReset').style.display='block'; 
-        let h=`<div class="input-group"><label>직접 입력 (시:분)</label><div style="display:flex; gap:10px;"><input type="number" id="setH" placeholder="시"> : <input type="number" id="setM" placeholder="분"></div></div>`; 
-        if(id==='exp'||id.startsWith('m_')||id==='trade') {
-            let preset = id==='trade' ? `<option value="6">6시간</option>` : `<option value="8">8시간</option><option value="11.5">11.5시간</option><option value="24">24시간</option>`;
-            h=`<select id="setT" style="margin-bottom:10px; width:100%; padding:12px; border-radius:10px; background:#000; color:white;"><option value="custom">직접입력</option>${preset}</select>`+h;
-        }
-        document.getElementById('setupBody').innerHTML=h; 
-        document.getElementById('setupModal').showModal(); 
-    }
-
-    function applySetup() { 
-        let n = Math.floor(Date.now()/1000); 
-        if(tSetup.startsWith('stam_')){ 
-            let k=tSetup.split('_')[1], c=parseInt(document.getElementById('sC').value)||0, m=parseInt(document.getElementById('sM').value)||1, u=parseFloat(document.getElementById('sU').value)*60||300; 
-            state.stam[k].c=c; state.stam[k].m=m; state.stam[k].u=u; state.stam[k].e=(c<m)?n+(m-c)*u:0; 
-        } else { 
-            let sec=0; if(document.getElementById('setT') && document.getElementById('setT').value!=='custom') sec=parseFloat(document.getElementById('setT').value)*3600; else sec=(parseInt(document.getElementById('setH').value)||0)*3600+(parseInt(document.getElementById('setM').value)||0)*60; 
-            if(sec>0){ 
-                if(tSetup==='exp') state.exp=n+sec; 
-                else if(tSetup==='trade') state.trade=n+sec;
-                else if(tSetup.startsWith('tr_')) state.bear_train[tSetup.split('_')[1]]=n+sec; 
-                else if(tSetup==='bal') state.bear_balloon=n+sec; 
-                else if(tSetup.startsWith('m_')) state.mining[tSetup.split('_')[1]]=n+sec; 
-                else if(tSetup.startsWith('t_')) state.tasks[tSetup.split('_')[1]].end=n+sec; 
-                notified[tSetup]=false;
-            } 
-        } 
-        save(); document.getElementById('setupModal').close(); 
-    }
-
-    function resetSetup() { 
-        if(tSetup==='exp') state.exp=0; 
-        else if(tSetup==='trade') state.trade=0;
-        else if(tSetup.startsWith('tr_')) state.bear_train[tSetup.split('_')[1]]=0; 
-        else if(tSetup==='bal') state.bear_balloon=0; 
-        else if(tSetup.startsWith('m_')) state.mining[tSetup.split('_')[1]]=0; 
-        save(); document.getElementById('setupModal').close(); 
-    }
-
+    function openSetupModal(id, t) { tSetup=id; document.getElementById('setupTitle').innerText=t; document.getElementById('btnReset').style.display='block'; let h=`<div class="input-group"><label>직접 입력 (시:분)</label><div style="display:flex; gap:10px;"><input type="number" id="setH" placeholder="시"> : <input type="number" id="setM" placeholder="분"></div></div>`; if(id==='exp'||id.startsWith('m_')||id==='trade') { let preset = id==='trade' ? `<option value="6">6시간</option>` : `<option value="8">8시간</option><option value="11.5">11.5시간</option><option value="24">24시간</option>`; h=`<select id="setT" style="margin-bottom:10px; width:100%; padding:12px; border-radius:10px; background:#000; color:white;"><option value="custom">직접입력</option>${preset}</select>`+h; } document.getElementById('setupBody').innerHTML=h; document.getElementById('setupModal').showModal(); }
+    function applySetup() { let n = Math.floor(Date.now()/1000); if(tSetup.startsWith('stam_')){ let k=tSetup.split('_')[1], c=parseInt(document.getElementById('sC').value)||0, m=parseInt(document.getElementById('sM').value)||1, u=parseFloat(document.getElementById('sU').value)*60||300; state.stam[k].c=c; state.stam[k].m=m; state.stam[k].u=u; state.stam[k].e=(c<m)?n+(m-c)*u:0; } else { let sec=0; if(document.getElementById('setT') && document.getElementById('setT').value!=='custom') sec=parseFloat(document.getElementById('setT').value)*3600; else sec=(parseInt(document.getElementById('setH').value)||0)*3600+(parseInt(document.getElementById('setM').value)||0)*60; if(sec>0){ if(tSetup==='exp') state.exp=n+sec; else if(tSetup==='trade') state.trade=n+sec; else if(tSetup.startsWith('tr_')) state.bear_train[tSetup.split('_')[1]]=n+sec; else if(tSetup==='bal') state.bear_balloon=n+sec; else if(tSetup.startsWith('m_')) state.mining[tSetup.split('_')[1]]=n+sec; else if(tSetup.startsWith('t_')) state.tasks[tSetup.split('_')[1]].end=n+sec; notified[tSetup]=false; } } save(); document.getElementById('setupModal').close(); }
+    function resetSetup() { if(tSetup==='exp') state.exp=0; else if(tSetup==='trade') state.trade=0; else if(tSetup.startsWith('tr_')) state.bear_train[tSetup.split('_')[1]]=0; else if(tSetup==='bal') state.bear_balloon=0; else if(tSetup.startsWith('m_')) state.mining[tSetup.split('_')[1]]=0; save(); document.getElementById('setupModal').close(); }
     function openAccelModal(id, t) { if(event) event.stopPropagation(); tAccel=id; let opts=[["1분",60],["10분",600],["1시간",3600],["12시간",43200]]; let h=''; opts.forEach((o,i)=>h+=`<div><label style="font-size:11px;">${o[0]}</label><input type="number" id="accel_${i}" value="0" style="width:100%; padding:8px; border-radius:5px; background:#000; color:white; border:1px solid #333;" onkeydown="if(event.keyCode==13)applyAccel()"></div>`); document.getElementById('accelOptions').innerHTML = h; document.getElementById('accelModal').showModal(); }
     function applyAccel() { let opts=[60,600,3600,43200], tot=0; opts.forEach((s,i)=>tot+=s*(parseInt(document.getElementById(`accel_${i}`).value)||0)); if(tot>0){ let n=Math.floor(Date.now()/1000); if(tAccel==='exp') state.exp=Math.max(n, state.exp-tot); else if(tAccel==='trade') state.trade=Math.max(n, state.trade-tot); else if(tAccel.startsWith('tr_')) state.bear_train[tAccel.split('_')[1]]=Math.max(n, state.bear_train[tAccel.split('_')[1]]-tot); else if(tAccel==='bal') state.bear_balloon=Math.max(n, state.bear_balloon-tot); else if(tAccel.startsWith('m_')) state.mining[tAccel.split('_')[1]]=Math.max(n, state.mining[tAccel.split('_')[1]]-tot); else if(tAccel.startsWith('t_')) state.tasks[tAccel.split('_')[1]].end=Math.max(n, state.tasks[tAccel.split('_')[1]].end-tot); save(); } document.getElementById('accelModal').close(); }
     function addTask() { let n=document.getElementById('mName').value, d=parseInt(document.getElementById('mD').value)||0, h=parseInt(document.getElementById('mH').value)||0, m=parseInt(document.getElementById('mM').value)||0; let s=(d*86400)+(h*3600)+(m*60); if(n && s>0){ if(!state.tasks) state.tasks=[]; state.tasks.push({name:n, end:Math.floor(Date.now()/1000)+s}); save(); document.getElementById('mName').value=''; switchView('dashboard', document.querySelectorAll('.nav-btn')[0]); } }
     function recoverLegacyData() { try { const d = JSON.parse(decodeURIComponent(atob(document.getElementById('legacyCode').value.trim()))); if(confirm("클라우드 데이터를 덮어씌울까요?")) { db.ref('crk_data').set(d).then(()=>alert("복구 성공!")); } } catch(e){ alert("잘못된 코드"); } }
     document.getElementById('bgInput').addEventListener('change', function(e) { const f = e.target.files[0]; if(f){ const r = new FileReader(); r.onload = function(evt){ state.bg = evt.target.result; save(); document.body.style.backgroundImage = `url('${state.bg}')`; }; r.readAsDataURL(f); } });
 
-    function getSortedIndices(arr, now) {
-        return arr.map((v, i) => i).sort((a, b) => {
-            let eA = arr[a], eB = arr[b];
-            let isRunningA = eA > now, isRunningB = eB > now;
-            if (isRunningA && !isRunningB) return -1;
-            if (!isRunningA && isRunningB) return 1;
-            if (isRunningA && isRunningB) return eA - eB;
-            return a - b;
-        });
-    }
+    function getSortedIndices(arr, now) { return arr.map((v, i) => i).sort((a, b) => { let eA = arr[a], eB = arr[b]; let isRunningA = eA > now, isRunningB = eB > now; if (isRunningA && !isRunningB) return -1; if (!isRunningA && isRunningB) return 1; if (isRunningA && isRunningB) return eA - eB; return a - b; }); }
 
-    function drawItem(title, end, id, theme, isT=false, idx=0) {
-        let n=Math.floor(Date.now()/1000), run=end>n, isE=end>0 && end<=n;
+    function drawItem(title, end, id, theme, isT=false, idx=0, showBtn=true) {
+        let n=Math.floor(Date.now()/1000), run=end>n;
         let vStr = run ? fmt(end-n) : "READY", vCls = run ? theme : "text-gray";
-        let btn = isT ? `<div class="task-btn-container"><div class="task-btn-half" onclick="openAccelModal('${id}','${title}')">▶▶▶</div><div class="task-btn-half task-btn-del" onclick="event.stopPropagation(); state.tasks.splice(${idx},1); save();">✖</div></div>` : `<div class="item-btn-area" onclick="openAccelModal('${id}','${title}')">▶▶▶</div>`;
-        return `<div class="item"><div class="item-click-area" onclick="${id==='trade'?'clickTracking(\'trade\')':`openSetupModal('${isT?'t_'+idx:id}','${title}')`}"><div class="item-title">${title}</div><div class="item-val ${vCls}">${vStr}</div></div>${btn}</div>`;
+        let btn = "";
+        if(showBtn) {
+            btn = isT ? `<div class="task-btn-container"><div class="task-btn-half" onclick="openAccelModal('${id}','${title}')">▶▶▶</div><div class="task-btn-half task-btn-del" onclick="event.stopPropagation(); state.tasks.splice(${idx},1); save();">✖</div></div>` : `<div class="item-btn-area" onclick="openAccelModal('${id}','${title}')">▶▶▶</div>`;
+        }
+        return `<div class="item"><div class="item-click-area" onclick="openSetupModal('${isT?'t_'+idx:id}','${title}')"><div class="item-title">${title}</div><div class="item-val ${vCls}">${vStr}</div></div>${btn}</div>`;
     }
 
     function render() {
         const now = Math.floor(Date.now()/1000);
         if(!document.getElementById('grid-stam')) return;
         
-        // 에너지 (Cyan)
         let h_s=''; ['normal','thick','fate'].forEach(k => {
             let d=state.stam[k], r=d.e-now, n = k==='normal'?'기본':k==='thick'?'두툼':'운명', u=d.u||300;
             if(r>0) h_s += `<div class="item"><div class="item-click-area" onclick="openStamModal('${k}','${n}')"><div class="item-title">${n}</div><div class="item-val text-white">${d.m-Math.ceil(r/u)}/${d.m}</div><div class="text-cyan" style="font-size:10px;">${fmt(r)}</div></div></div>`;
@@ -270,17 +220,18 @@
         });
         document.getElementById('grid-stam').innerHTML = h_s;
 
-        // 🔥 보라색 섹션: 분수, 생산 색상 및 무역소 추가 🔥
+        // 🔥 무역소: 가속 버튼 제거 버전 🔥
         document.getElementById('grid-track').innerHTML = `
             <div class="item"><div class="item-click-area" onclick="clickTracking('arena')"><div class="item-title">아레나</div><div class="item-val ${state.arena>now?'text-purple':'text-gray'}">${state.arena>now?fmt(state.arena-now):'READY'}</div></div></div>
             <div class="item"><div class="item-click-area" onclick="clickTracking('fount')"><div class="item-title">분수</div><div class="item-val text-purple">${fmt(now-state.fount)}</div></div></div>
             <div class="item"><div class="item-click-area" onclick="clickTracking('prod')"><div class="item-title">생산</div><div class="item-val ${state.prod>0?'text-purple':'text-gray'}">${state.prod>0?fmt(now-state.prod):'OFF'}</div></div></div>
-            ${drawItem("무역소", state.trade, "trade", "text-purple")}
+            <div class="item"><div class="item-click-area" onclick="clickTracking('trade')"><div class="item-title">무역소</div><div class="item-val ${state.trade>now?'text-purple':'text-gray'}">${state.trade>now?fmt(state.trade-now):'READY'}</div></div></div>
         `;
         
         document.getElementById('exp-container').innerHTML = drawItem("광산 탐사", state.exp, "exp", "text-rose");
-        let h_tr=''; getSortedIndices(state.bear_train, now).forEach(i => h_tr += drawItem("물류 열차", state.bear_train[i], 'tr_'+i, "text-pink")); document.getElementById('grid-train').innerHTML = h_tr;
         document.getElementById('bal-container').innerHTML = drawItem("열기구", state.bear_balloon, "bal", "text-sky");
+        let h_tr=''; getSortedIndices(state.bear_train, now).forEach(i => h_tr += drawItem("물류 열차", state.bear_train[i], 'tr_'+i, "text-pink")); document.getElementById('grid-train').innerHTML = h_tr;
+        
         let h_m=''; getSortedIndices(state.mining, now).forEach(i => h_m += drawItem("광맥 채굴", state.mining[i], 'm_'+i, "text-orange")); document.getElementById('grid-mine').innerHTML = h_m;
         
         if(state.tasks && state.tasks.length>0){
