@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CRK PRO LIVE v14.6</title>
+    <title>CRK PRO LIVE v14.7</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
@@ -18,7 +18,7 @@
         * { box-sizing: border-box; font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-body); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* 🔥 로딩 오버레이 화면 🔥 */
+        /* 로딩 오버레이 */
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
 
         /* 네비게이션 */
@@ -35,13 +35,12 @@
         .view-section.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 🔥 공통 레이아웃 (찌그러짐 방지 width: 100% 적용) 🔥 */
+        /* 카드 & 그리드 */
         .row { display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px; width: 100%; }
         .card { width: 100%; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border-radius: 18px; padding: 18px; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .card-header { font-size: 13px; font-weight: 800; color: var(--text-main); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
         .dot { width: 8px; height: 8px; border-radius: 50%; }
 
-        /* 아이템 모듈 */
         .item-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
         .item { background: rgba(15, 23, 42, 0.85); border-radius: 15px; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; transition: 0.2s; }
         .item-click-area { padding: 18px 5px; cursor: pointer; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -83,7 +82,7 @@
             #grid-mine, #grid-tasks { grid-template-columns: repeat(6, 1fr) !important; }
         }
 
-        /* 🔥 설정창 그리드화 (겹침 완전 방지) 🔥 */
+        /* 설정창 그리드화 (겹침 완전 방지) */
         .settings-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; width: 100%; }
         .setting-card { flex: 1; min-width: 350px; max-width: 500px; }
         .input-group { margin-bottom: 12px; width: 100%; }
@@ -181,20 +180,35 @@
     let state = JSON.parse(JSON.stringify(INITIAL_STATE));
     let notified={};
 
-    // 🔥 로딩 오버레이 제어 및 데이터 보호 로직 🔥
+    // 🔥 3초 로딩 타임아웃 방어막 (무한 대기 방지) 🔥
+    let loadTimeout = setTimeout(() => {
+        let overlay = document.getElementById('loading-overlay');
+        if(overlay && overlay.style.display !== 'none') {
+            overlay.style.display = 'none';
+            alert("⚠️ 서버 연결이 지연되어 오프라인 모드로 진입합니다.\n인터넷 연결이나 Firebase 규칙(Rules) 설정을 확인해 주세요.");
+            render();
+        }
+    }, 3000);
+
+    // 🔥 데이터 수신 및 에러 캐치 🔥
     db.ref('crk_data').on('value', (s) => {
+        clearTimeout(loadTimeout); // 정상 수신 시 타임아웃 취소
         const v = s.val();
         if(v) { 
-            state = { ...INITIAL_STATE, ...v }; // 기존 데이터와 합치기
+            state = { ...INITIAL_STATE, ...v }; 
             if(!state.stam.normal.u) { state.stam.normal.u=300; state.stam.thick.u=540; state.stam.fate.u=1080; }
             if(state.bg) document.body.style.backgroundImage = `url('${state.bg}')`; 
         } else {
-            // 서버에 데이터가 완전히 텅 비어있을 때만 초기화 진행
             db.ref('crk_data').set(INITIAL_STATE);
         }
-        // 로딩이 끝나면 화면을 보여줌
         document.getElementById('loading-overlay').style.display = 'none';
         render(); 
+    }, (error) => {
+        // 🔥 권한 에러 발생 시 처리 🔥
+        clearTimeout(loadTimeout);
+        document.getElementById('loading-overlay').style.display = 'none';
+        alert("❌ 클라우드 접근 거부!\nFirebase 콘솔에서 Realtime Database의 '규칙(Rules)'이 true인지 확인하세요.\n상세: " + error.message);
+        render();
     });
 
     function save() { db.ref('crk_data').update(state); }
